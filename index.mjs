@@ -1,7 +1,5 @@
 import cookieParser from 'cookie-parser';
 import express from 'express';
-import http from 'http';
-import { Server } from 'socket.io';
 import methodOverride from 'method-override';
 import webpack from 'webpack';
 import webpackDevMiddleware from 'webpack-dev-middleware';
@@ -11,8 +9,6 @@ import webpackConfig from './webpack_conf/webpack.dev.js';
 import bindRoutes from './routes.mjs';
 
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
 app.set('view engine', 'ejs');
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
@@ -41,16 +37,11 @@ if (env === 'development') {
 	);
 }
 
-io.on('connection', (socket) => {
-	console.log('connected to my server!!');
-	socket.on('message', (message) => {
-		socket.broadcast.emit('message:receive', message);
-	});
-});
-
 // Bind route definitions to the Express application
 bindRoutes(app);
 
 // Set Express to listen on the given port
 const PORT = process.env.PORT || 3004;
-server.listen(PORT);
+app.listen(PORT, () => {
+	console.log(`Listening to port:${PORT}`);
+});

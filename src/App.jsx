@@ -1,39 +1,32 @@
-import React, { useState, useEffect } from 'react'
-import { Routes, Route, Link } from "react-router-dom"
+import React, { useState } from 'react'
+import {
+    Routes,
+    Route,
+} from "react-router-dom";
 import Container from '@mui/material/Container'
 import Box from '@mui/material/Box'
-import Paper from '@mui/material/Paper'
-import TextField from '@mui/material/TextField'
-import Button from '@mui/material/Button'
-import Stack from '@mui/material/Stack'
+
 import Homepage from './Homepage.jsx'
-
-
+import Register from './Register.jsx'
+import Login from './Login.jsx'
+import ProtectedRoute from './ProtectedRoute.jsx';
+import useAuth from './hooks/useAuth.js';
 
 const App = () => {
-    const [text, setText] = useState()
+    const { user, setUser } = useAuth();
 
     return (
         <Box p={4}>
             <Container maxWidth='sm'>
-                <Paper>
-                    <Box p={2}>
-                        {text}
-                    </Box>
-                </Paper>
-                <Stack spacing={2} direction="row" mt={2}>
-                    <TextField
-                        id="chat-box"
-                        label="Enter your text"
-                        fullWidth
-
-                    />
-                    <Link to='/api'><Button variant='contained'>Send</Button></Link>
-                </Stack>
+                <Routes>
+                    <Route path='/login' element={<Login setUser={setUser} />} />
+                    <Route path='/register' element={<Register />} />
+                    <Route element={<ProtectedRoute user={user} />}>
+                        <Route path='/homepage' element={<Homepage />} />
+                        <Route path='/people' element={<Homepage />} />
+                    </Route>
+                </Routes>
             </Container>
-            <Routes>
-                <Route path="/api" element={<Homepage />} />
-            </Routes>
         </Box>
     )
 }

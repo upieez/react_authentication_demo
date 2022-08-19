@@ -1,6 +1,7 @@
 import { Sequelize } from 'sequelize';
 import url from 'url';
 import allConfig from '../config/config.js';
+import userModal from './user.mjs';
 
 const env = process.env.NODE_ENV || 'development';
 
@@ -37,6 +38,8 @@ if (env === 'production') {
 		config
 	);
 }
+
+db.User = userModal(sequelize, Sequelize.DataTypes);
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
