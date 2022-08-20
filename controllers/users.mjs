@@ -1,6 +1,12 @@
 import jsSHA from 'jssha';
 
-const SALT = 'salt';
+const SALT = process.env.SALT;
+
+const hashValue = (value) => {
+	const shaObj = new jsSHA('SHA-512', 'TEXT', { encoding: 'UTF8' });
+	shaObj.update(value);
+	return shaObj.getHash('HEX');
+};
 
 export default function initUsersController(db) {
 	const login = async (request, response) => {
@@ -10,10 +16,16 @@ export default function initUsersController(db) {
 					email: request.body.email,
 				},
 			});
-			const shaObj = new jsSHA('SHA-512', 'TEXT', { encoding: 'UTF8' });
+
+			const hashedPassword = hashValue(request.body.password);
+			if (user.password !== hashedPassword) {
+				response.status(401);
+				response.send('authentication failed');
+				return;
+			}
+
 			const unhashedCookieString = `${user.id}-${SALT}`;
-			shaObj.update(unhashedCookieString);
-			const hashedCookieString = shaObj.getHash('HEX');
+			const hashedCookieString = hashValue(unhashedCookieString);
 			response.cookie('loggedInHash', hashedCookieString);
 			response.cookie('userId', user.id);
 			response.json({ userId: user.id });
@@ -24,39 +36,33 @@ export default function initUsersController(db) {
 
 	const register = async (request, response) => {
 		try {
-			const shaObj = new jsSHA('SHA-512', 'TEXT', { encoding: 'UTF8' });
-			shaObj.update(request.body.password);
-			const hashedPassword = shaObj.getHash('HEX');
+			const hashedPassword = hashValue(request.body.password);
 
 			const user = await db.User.create({
 				email: request.body.email,
 				password: hashedPassword,
 			});
 
-			const shaIdObj = new jsSHA('SHA-512', 'TEXT', { encoding: 'UTF8' });
 			const unhashedCookieString = `${user.id}-${SALT}`;
-			shaIdObj.update(unhashedCookieString);
-			const hashedCookieString = shaIdObj.getHash('HEX');
+			const hashedCookieString = hashValue(unhashedCookieString);
 
 			response.cookie('loggedInHash', hashedCookieString);
 			response.cookie('userId', user.id);
-			response.send('registered');
+			response.json({ userId: user.id });
 		} catch (error) {
 			console.log(error);
 		}
 	};
 
-	const verify = async (request, response) => {
+	const verify = (request, response) => {
 		const userId = request.cookies.userId;
 		const loggedInHash = request.cookies.loggedInHash;
 
-		const shaObj = new jsSHA('SHA-512', 'TEXT', { encoding: 'UTF8' });
 		const unhashedCookieString = `${userId}-${SALT}`;
-		shaObj.update(unhashedCookieString);
-		const hashedCookieString = shaObj.getHash('HEX');
+		const hashedCookieString = hashValue(unhashedCookieString);
 
 		if (hashedCookieString === loggedInHash) {
-			response.send('logged in');
+			response.json({ userId: userId });
 		} else {
 			response.clearCookie('loggedInHash');
 			response.clearCookie('userId');
@@ -64,9 +70,16 @@ export default function initUsersController(db) {
 		}
 	};
 
+	const logout = (request, response) => {
+		response.clearCookie('loggedInHash');
+		response.clearCookie('userId');
+		response.json({ redirect: '/' });
+	};
+
 	return {
 		login,
 		register,
 		verify,
+		logout,
 	};
 }

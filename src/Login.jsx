@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import axios from 'axios'
-import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import Stack from '@mui/material/Stack'
@@ -12,15 +12,14 @@ export default function Login({ setUser }) {
     const [password, setPassword] = useState('')
     const navigate = useNavigate();
 
-    const handleLogin = async () => {
-        console.log
-        await axios.post('/login', {
-            email: email,
-            password: password
-        }).then(response => {
-            setUser({ userId: response.data.userId })
-            navigate('/people', { replace: true })
-        })
+    const handleLogin = () => {
+        axios
+            .post('/login', { email: email, password: password })
+            .then(res => {
+                setUser({ userId: res.data.userId })
+                navigate('/homepage');
+            })
+            .catch(err => console.log(err));
     }
 
     return (

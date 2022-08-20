@@ -1,21 +1,22 @@
 import React, { useState } from 'react'
 import axios from 'axios'
+import { useNavigate } from "react-router-dom";
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import Link from '@mui/material/Link'
 
-export default function Register() {
+export default function Register({ setUser }) {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const navigate = useNavigate()
 
-    const handleRegister = async () => {
-        console.log('email', email)
-        const data = await axios.post('/register', {
-            email: email,
-            password: password
-        }).then(e => console.log('ehh', e))
+    const handleRegister = () => {
+        axios.post('/register', { email: email, password: password }).then(res => {
+            setUser({ userId: res.data.userId })
+            navigate('/homepage');
+        });
     }
 
     return (

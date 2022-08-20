@@ -1,6 +1,6 @@
 module.exports = {
 	development: {
-		username: 'samuel',
+		username: '<YOUR_DB_USERNAME>',
 		password: null,
 		database: 'react_auth_development',
 		host: '127.0.0.1',

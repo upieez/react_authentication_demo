@@ -7,6 +7,7 @@ export default function routes(app) {
 
 	app.post('/login', UsersController.login);
 	app.post('/register', UsersController.register);
+	app.post('/logout', UsersController.logout);
 	app.get('/verify', UsersController.verify);
 
 	app.get('*', (request, response) => {
