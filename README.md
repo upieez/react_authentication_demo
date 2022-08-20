@@ -7,3 +7,4 @@ This repo consists of client side authentication with React and Express
 - axios
 - dotenv
 - js-cookie
+- react-router-dom
